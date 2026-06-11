@@ -57,10 +57,17 @@ function hasDangerousProtocol(value: string): boolean {
 }
 
 function sanitizeString(value: string): string {
+  const hasUnsafeHtml =
+    /<\/?\s*script\b/i.test(value) ||
+    /\son\w+\s*=/i.test(value) ||
+    /\s(?:href|src)\s*=\s*(['"])\s*(?:javascript|data)\s*:/i.test(value);
+  if (!hasUnsafeHtml) return value;
   return value
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/\son\w+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '')
-    .replace(/\s(href|src)\s*=\s*(['"])\s*(?:javascript|data)\s*:[\s\S]*?\2/gi, '');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function sanitizeNested(value: any, keyHint?: string): any {
