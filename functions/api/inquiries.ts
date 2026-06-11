@@ -9,18 +9,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   let body: { name?: string; email?: string; type?: string; date?: string; message?: string };
-  try {
-    const formData = await request.formData();
-    body = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      type: formData.get('type') as string,
-      date: formData.get('date') as string,
-      message: formData.get('message') as string,
-    };
-  } catch {
+  const contentType = request.headers.get('Content-Type') || '';
+
+  if (contentType.includes('application/json')) {
     try {
       body = await request.json();
+    } catch {
+      return Response.json({ error: 'Invalid request' }, { status: 400 });
+    }
+  } else {
+    try {
+      const formData = await request.formData();
+      body = {
+        name: formData.get('name') as string,
+        email: formData.get('email') as string,
+        type: formData.get('type') as string,
+        date: formData.get('date') as string,
+        message: formData.get('message') as string,
+      };
     } catch {
       return Response.json({ error: 'Invalid request' }, { status: 400 });
     }
@@ -51,7 +57,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Mia Kulin Site <notifications@miakulin.com>',
+          from: 'Mia Kulin Site <onboarding@resend.dev>',
           to: [env.ADMIN_EMAIL],
           subject: `New ${type} inquiry from ${name}`,
           html: `
