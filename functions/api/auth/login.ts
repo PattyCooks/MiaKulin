@@ -35,8 +35,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: 'Email and password required' }, { status: 400 });
   }
 
-  // Only allow the admin email
-  if (email.toLowerCase() !== env.ADMIN_EMAIL.toLowerCase()) {
+  // Only allow approved admin emails
+  const allowedEmails = env.ADMIN_EMAIL.split(',').map(e => e.trim().toLowerCase());
+  if (!allowedEmails.includes(email.toLowerCase())) {
     return Response.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
