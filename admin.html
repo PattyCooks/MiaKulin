@@ -162,9 +162,13 @@
                     <div id="inquiries-list"><p style="color:var(--muted)">Loading...</p></div>
                 </div>
                 <div class="ai-box" id="aiBox">
-                    <h3>AI Assistant</h3>
-                    <textarea id="aiPrompt" placeholder="Ask the AI to rewrite text, suggest copy, or improve a section..."></textarea>
-                    <button onclick="askAI()">Generate</button>
+                    <h3>AI Assistant — full site access</h3>
+                    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem">Ask it to rewrite copy, change the theme/colors, add or remove services, tweak any section. Changes are applied to the form below — review then click <strong>Save &amp; Publish</strong>.</p>
+                    <textarea id="aiPrompt" placeholder="e.g. Make the theme warmer with a deep red accent, or rewrite the bio to be shorter and punchier"></textarea>
+                    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                        <button onclick="askAI()" id="aiGenerateBtn">Generate &amp; Apply</button>
+                        <button onclick="undoAI()" id="aiUndoBtn" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text)">Undo last AI change</button>
+                    </div>
                     <div class="ai-result" id="aiResult"></div>
                 </div>
             </div>
@@ -287,13 +291,86 @@
         if(data.ok) { toast('Reset to defaults'); loadContent(); } else toast('Reset failed', true);
     }
 
+    let aiUndoSnapshot = null;
+    const unsafeMergeKeys = new Set(['__proto__', 'constructor', 'prototype']);
+
+    function deepMerge(target, patch) {
+        if (patch === null || patch === undefined) return target;
+        if (Array.isArray(patch)) return patch.slice(); // arrays replace wholesale
+        if (typeof patch !== 'object') return patch;
+        if (target === null || target === undefined || typeof target !== 'object' || Array.isArray(target)) {
+            target = {};
+        }
+        const out = Array.isArray(target) ? target.slice() : Object.assign({}, target);
+        for (const k of Object.keys(patch)) {
+            if (unsafeMergeKeys.has(k)) continue;
+            out[k] = deepMerge(out[k], patch[k]);
+        }
+        return out;
+    }
+
+    function summarizeChangedKeys(changes) {
+        if (!changes || typeof changes !== 'object') return '';
+        const keys = Object.keys(changes);
+        if (!keys.length) return 'No changes';
+        return 'Updated: ' + keys.join(', ');
+    }
+
     async function askAI() {
-        const prompt = document.getElementById('aiPrompt').value;
-        if(!prompt) return;
-        document.getElementById('aiResult').textContent = 'Thinking...';
-        const res = await fetch('/api/admin/ai', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ prompt, section:currentSection, current_content:JSON.stringify(content[currentSection]||{}) }) });
-        const data = await res.json();
-        document.getElementById('aiResult').textContent = data.result || data.error || 'No response';
+        const prompt = document.getElementById('aiPrompt').value.trim();
+        const resultEl = document.getElementById('aiResult');
+        const btn = document.getElementById('aiGenerateBtn');
+        if (!prompt) return;
+        // Capture current form values so the AI sees the user's unsaved edits
+        collectFields();
+        resultEl.textContent = 'Thinking…';
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/admin/ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, section: currentSection, content }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+                resultEl.textContent = data.error || 'AI request failed';
+                toast('AI request failed', true);
+                return;
+            }
+            const changes = data.changes || {};
+            const changedKeys = Object.keys(changes);
+            if (!changedKeys.length) {
+                resultEl.textContent = (data.summary ? data.summary + '\n\n' : '') + 'No changes were applied.';
+                return;
+            }
+            // Snapshot for undo, then deep-merge and re-render
+            aiUndoSnapshot = JSON.parse(JSON.stringify(content));
+            content = deepMerge(content, changes);
+            renderFields();
+            renderListEditors();
+            document.getElementById('aiUndoBtn').style.display = 'inline-block';
+            resultEl.textContent =
+                (data.summary || 'Changes applied.') + '\n\n' +
+                summarizeChangedKeys(changes) + '\n' +
+                'Review the form, then click "Save & Publish" to push it live.';
+            toast('AI applied changes — review & save');
+        } catch (e) {
+            resultEl.textContent = 'AI request failed: ' + (e && e.message ? e.message : e);
+            toast('AI request failed', true);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function undoAI() {
+        if (!aiUndoSnapshot) return;
+        content = aiUndoSnapshot;
+        aiUndoSnapshot = null;
+        renderFields();
+        renderListEditors();
+        document.getElementById('aiUndoBtn').style.display = 'none';
+        document.getElementById('aiResult').textContent = 'Reverted last AI change. (Not yet published.)';
+        toast('Reverted');
     }
 
     async function loadInquiries() {
