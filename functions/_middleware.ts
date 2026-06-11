@@ -9,7 +9,7 @@ const PUBLIC_PATHS = new Set([
   '/', '/index.html', '/admin.html', '/admin',
   '/qr.html', '/qr', '/mia.vcf',
   '/robots.txt', '/sitemap.xml', '/llms.txt', '/404.html',
-  '/api/auth/login', '/api/inquiries',
+  '/api/auth/login', '/api/inquiries', '/api/content',
 ]);
 
 function isPublic(path: string): boolean {

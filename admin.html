@@ -1,280 +1,326 @@
 <!DOCTYPE html>
-<html lang="en-CA">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin — Mia Kulin</title>
-    <meta name="robots" content="noindex, nofollow">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="robots" content="noindex">
     <style>
-        :root {
-            --bg: #0d0d1a;
-            --surface: #1a1a2e;
-            --border: rgba(255,255,255,0.08);
-            --text: #f0f0f5;
-            --muted: #a0a0b5;
-            --accent: #c084fc;
-            --accent-hover: #a855f7;
-            --success: #4ade80;
-            --warning: #fbbf24;
-            --danger: #f87171;
-            --radius: 12px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-        /* Login Form */
-        .login-wrapper { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
-        .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 400px; }
-        .login-card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .login-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1.25rem; }
-        .form-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
-        .form-group input { width: 100%; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; }
-        .form-group input:focus { outline: none; border-color: var(--accent); }
-        .btn { width: 100%; padding: 0.85rem; background: var(--accent); color: #fff; border: none; border-radius: 50px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn:hover { background: var(--accent-hover); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 1rem; display: none; }
-
-        /* Dashboard */
-        .dashboard { display: none; padding: 2rem; max-width: 1000px; margin: 0 auto; }
-        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-        .dash-header h1 { font-size: 1.5rem; }
-        .dash-header .logout-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 1rem; border-radius: 50px; cursor: pointer; font-size: 0.85rem; }
-        .dash-header .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
-
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
-        .stat-card .number { font-size: 2rem; font-weight: 700; color: var(--accent); }
-        .stat-card .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
-
-        .section-title { font-size: 1.1rem; margin-bottom: 1rem; color: var(--muted); }
-        .inquiry-list { display: flex; flex-direction: column; gap: 1rem; }
-        .inquiry-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: 0.2s; }
-        .inquiry-card.unread { border-left: 3px solid var(--accent); }
-        .inquiry-card .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-        .inquiry-card .meta .name { font-weight: 600; }
-        .inquiry-card .meta .date { font-size: 0.8rem; color: var(--muted); }
-        .inquiry-card .type-badge { display: inline-block; background: rgba(192,132,252,0.15); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem; }
-        .inquiry-card .message { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
-        .inquiry-card .contact { font-size: 0.85rem; color: var(--accent); margin-top: 0.5rem; }
-        .inquiry-card .actions { margin-top: 0.75rem; }
-        .inquiry-card .mark-read { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; }
-        .inquiry-card .mark-read:hover { border-color: var(--success); color: var(--success); }
-
-        .empty { text-align: center; color: var(--muted); padding: 3rem; }
-
-        /* Change Password Modal */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 2rem; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 400px; }
-        .modal h2 { margin-bottom: 0.5rem; }
-        .modal p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        :root { --bg:#0e0e18; --surface:#17172a; --border:rgba(255,255,255,0.08); --text:#e8e8f0; --muted:#8a8aa0; --accent:#b07ce8; --danger:#e85454; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+        .login { max-width:360px; margin:20vh auto; padding:2rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; }
+        .login h1 { font-size:1.2rem; margin-bottom:1rem; }
+        .login input { width:100%; padding:0.7rem; margin-bottom:0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.9rem; }
+        .login input:focus { outline:none; border-color:var(--accent); }
+        .login button { width:100%; padding:0.7rem; background:var(--accent); border:none; border-radius:4px; color:#fff; font-weight:600; cursor:pointer; }
+        .admin { display:none; }
+        .admin.active { display:block; }
+        .topbar { padding:0.75rem 1.5rem; background:var(--surface); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
+        .topbar h1 { font-size:1rem; font-weight:600; }
+        .topbar__actions { display:flex; gap:0.5rem; }
+        .topbar__actions button { padding:0.5rem 1rem; border-radius:4px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:0.8rem; cursor:pointer; }
+        .topbar__actions button:hover { border-color:var(--accent); }
+        .topbar__actions .btn-save { background:var(--accent); border-color:var(--accent); color:#fff; }
+        .topbar__actions .btn-reset { border-color:var(--danger); color:var(--danger); }
+        .layout { display:grid; grid-template-columns:200px 1fr; min-height:calc(100vh - 50px); }
+        .sidebar { background:var(--surface); border-right:1px solid var(--border); padding:1rem 0; }
+        .sidebar a { display:block; padding:0.6rem 1.25rem; color:var(--muted); text-decoration:none; font-size:0.85rem; border-left:3px solid transparent; }
+        .sidebar a:hover { color:var(--text); background:rgba(255,255,255,0.02); }
+        .sidebar a.active { color:var(--accent); border-left-color:var(--accent); background:rgba(176,124,232,0.05); }
+        .main { padding:2rem; max-width:800px; }
+        .main h2 { font-size:1.2rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem; }
+        .field { margin-bottom:1.25rem; }
+        .field label { display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:0.35rem; }
+        .field input, .field textarea, .field select { width:100%; padding:0.65rem 0.8rem; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:inherit; font-size:0.9rem; }
+        .field input:focus, .field textarea:focus { outline:none; border-color:var(--accent); }
+        .field textarea { min-height:80px; resize:vertical; }
+        .field .hint { font-size:0.72rem; color:var(--muted); margin-top:0.25rem; }
+        .list-editor { border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+        .list-editor__item { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; border-bottom:1px solid var(--border); }
+        .list-editor__item:last-child { border-bottom:none; }
+        .list-editor__item input { flex:1; border:none; background:transparent; color:var(--text); font-size:0.85rem; padding:0.3rem; }
+        .list-editor__item input:focus { outline:none; }
+        .list-editor__item button { background:none; border:none; color:var(--danger); cursor:pointer; font-size:1rem; padding:0.25rem; opacity:0.6; }
+        .list-editor__item button:hover { opacity:1; }
+        .list-editor__add { display:block; width:100%; padding:0.5rem; border:none; background:rgba(176,124,232,0.08); color:var(--accent); font-size:0.8rem; cursor:pointer; text-align:center; }
+        .list-editor__add:hover { background:rgba(176,124,232,0.15); }
+        .band-editor { border:1px solid var(--border); border-radius:4px; padding:1rem; margin-bottom:0.75rem; background:rgba(255,255,255,0.01); }
+        .band-editor h4 { font-size:0.85rem; margin-bottom:0.75rem; color:var(--accent); }
+        .color-row { display:flex; gap:1rem; flex-wrap:wrap; }
+        .color-field { display:flex; align-items:center; gap:0.5rem; }
+        .color-field input[type="color"] { width:36px; height:36px; border:1px solid var(--border); border-radius:4px; cursor:pointer; background:var(--bg); padding:2px; }
+        .color-field span { font-size:0.8rem; color:var(--muted); }
+        .ai-box { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem; margin-top:2rem; }
+        .ai-box h3 { font-size:0.85rem; margin-bottom:0.75rem; }
+        .ai-box textarea { width:100%; padding:0.6rem; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.85rem; min-height:60px; resize:vertical; margin-bottom:0.5rem; }
+        .ai-box textarea:focus { outline:none; border-color:var(--accent); }
+        .ai-box button { padding:0.5rem 1rem; background:var(--accent); border:none; border-radius:4px; color:#fff; font-size:0.8rem; cursor:pointer; }
+        .ai-box .ai-result { margin-top:0.75rem; padding:0.75rem; background:var(--bg); border-radius:4px; font-size:0.85rem; white-space:pre-wrap; max-height:200px; overflow-y:auto; }
+        .ai-box .ai-result:empty { display:none; }
+        .toast { position:fixed; bottom:1.5rem; right:1.5rem; padding:0.75rem 1.25rem; background:#1a9; color:#fff; border-radius:4px; font-size:0.85rem; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:999; }
+        .toast.show { opacity:1; }
+        .toast.error { background:var(--danger); }
+        .section-panel { display:none; }
+        .section-panel.active { display:block; }
+        .inquiries-panel .inquiry { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem; margin-bottom:0.75rem; }
+        .inquiries-panel .inquiry h4 { font-size:0.9rem; margin-bottom:0.25rem; }
+        .inquiries-panel .inquiry p { font-size:0.82rem; color:var(--muted); }
+        .inquiries-panel .inquiry .meta { font-size:0.75rem; color:var(--accent); margin-top:0.4rem; }
+        @media(max-width:768px) { .layout { grid-template-columns:1fr; } .sidebar { display:flex; overflow-x:auto; padding:0; border-right:none; border-bottom:1px solid var(--border); } .sidebar a { white-space:nowrap; border-left:none; border-bottom:3px solid transparent; } .sidebar a.active { border-bottom-color:var(--accent); border-left-color:transparent; } }
     </style>
 </head>
 <body>
-    <!-- LOGIN -->
-    <div class="login-wrapper" id="loginView">
-        <div class="login-card">
-            <h1>Admin Login</h1>
-            <p>Restricted to authorized email only.</p>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" required autocomplete="current-password">
-                </div>
-                <button type="submit" class="btn" id="loginBtn">Sign In</button>
-                <p class="error-msg" id="loginError"></p>
-            </form>
-        </div>
+    <div class="login" id="loginPanel">
+        <h1>Admin Login</h1>
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+        <button onclick="login()">Sign In</button>
+        <p id="loginError" style="color:var(--danger);font-size:0.8rem;margin-top:0.5rem"></p>
     </div>
 
-    <!-- DASHBOARD -->
-    <div class="dashboard" id="dashView">
-        <div class="dash-header">
-            <h1>📬 Inquiries</h1>
-            <button class="logout-btn" id="logoutBtn">Sign Out</button>
+    <div class="admin" id="adminPanel">
+        <div class="topbar">
+            <h1>Mia Kulin — Site Editor</h1>
+            <div class="topbar__actions">
+                <button class="btn-reset" onclick="hardReset()">Reset to Default</button>
+                <button class="btn-save" onclick="saveAll()">Save &amp; Publish</button>
+                <button onclick="logout()">Sign Out</button>
+            </div>
         </div>
-
-        <div class="stats" id="stats">
-            <div class="stat-card"><div class="number" id="statTotal">0</div><div class="label">Total</div></div>
-            <div class="stat-card"><div class="number" id="statNew">0</div><div class="label">New</div></div>
-            <div class="stat-card"><div class="number" id="statRead">0</div><div class="label">Read</div></div>
-        </div>
-
-        <h3 class="section-title">Recent Inquiries</h3>
-        <div class="inquiry-list" id="inquiryList">
-            <div class="empty">No inquiries yet.</div>
+        <div class="layout">
+            <nav class="sidebar">
+                <a href="#" data-section="hero" class="active">Hero</a>
+                <a href="#" data-section="about">About</a>
+                <a href="#" data-section="music">Music</a>
+                <a href="#" data-section="live">Live / Videos</a>
+                <a href="#" data-section="booking">Booking</a>
+                <a href="#" data-section="contact">Contact</a>
+                <a href="#" data-section="theme">Theme</a>
+                <a href="#" data-section="meta">SEO / Meta</a>
+                <a href="#" data-section="inquiries">Inquiries</a>
+            </nav>
+            <div class="main">
+                <div class="section-panel active" id="panel-hero">
+                    <h2>Hero Section</h2>
+                    <div class="field"><label>Title</label><input type="text" data-path="hero.title"></div>
+                    <div class="field"><label>Subtitle</label><input type="text" data-path="hero.subtitle"></div>
+                    <div class="field"><label>Button Text</label><input type="text" data-path="hero.cta_text"></div>
+                    <div class="field"><label>Button Link</label><input type="text" data-path="hero.cta_link"><p class="hint">Use #contact, #booking, or a full URL</p></div>
+                </div>
+                <div class="section-panel" id="panel-about">
+                    <h2>About Section</h2>
+                    <div class="field"><label>Heading</label><input type="text" data-path="about.heading"></div>
+                    <div class="field"><label>Bio Paragraph 1</label><textarea data-path="about.paragraphs.0"></textarea><p class="hint">HTML allowed for bold etc.</p></div>
+                    <div class="field"><label>Bio Paragraph 2</label><textarea data-path="about.paragraphs.1"></textarea></div>
+                    <div class="field"><label>Portrait Image Path</label><input type="text" data-path="about.image"><p class="hint">e.g. img/mia-portrait.jpg</p></div>
+                    <div id="socials-editor"></div>
+                </div>
+                <div class="section-panel" id="panel-music">
+                    <h2>Music Section</h2>
+                    <div class="field"><label>Heading</label><input type="text" data-path="music.heading"></div>
+                    <div id="bands-editor"></div>
+                    <div class="field"><label>Setlist Heading</label><input type="text" data-path="music.setlist_heading"></div>
+                    <div class="field"><label>Songs</label><div id="setlist-editor"></div></div>
+                </div>
+                <div class="section-panel" id="panel-live">
+                    <h2>Live / Videos</h2>
+                    <div class="field"><label>Heading</label><input type="text" data-path="live.heading"></div>
+                    <div class="field"><label>Description</label><textarea data-path="live.text"></textarea></div>
+                    <div id="live-links-editor"></div>
+                    <div class="field" style="margin-top:1.5rem"><label>YouTube Video IDs</label><div id="videos-editor"></div><p class="hint">Add YouTube video IDs to show embeds (e.g. dQw4w9WgXcQ)</p></div>
+                </div>
+                <div class="section-panel" id="panel-booking">
+                    <h2>Booking Section</h2>
+                    <div class="field"><label>Heading</label><input type="text" data-path="booking.heading"></div>
+                    <div class="field"><label>Subtitle</label><textarea data-path="booking.subtitle"></textarea></div>
+                    <div class="field"><label>Services</label><div id="services-editor"></div></div>
+                    <div class="field"><label>Button Text</label><input type="text" data-path="booking.cta_text"></div>
+                </div>
+                <div class="section-panel" id="panel-contact">
+                    <h2>Contact Section</h2>
+                    <div class="field"><label>Heading</label><input type="text" data-path="contact.heading"></div>
+                    <div class="field"><label>Subtitle</label><input type="text" data-path="contact.subtitle"></div>
+                </div>
+                <div class="section-panel" id="panel-theme">
+                    <h2>Theme Colors</h2>
+                    <div class="color-row">
+                        <div class="color-field"><input type="color" data-path="theme.accent"><span>Accent</span></div>
+                        <div class="color-field"><input type="color" data-path="theme.bg"><span>Background</span></div>
+                        <div class="color-field"><input type="color" data-path="theme.surface"><span>Surface</span></div>
+                        <div class="color-field"><input type="color" data-path="theme.text"><span>Text</span></div>
+                        <div class="color-field"><input type="color" data-path="theme.muted"><span>Muted</span></div>
+                    </div>
+                </div>
+                <div class="section-panel" id="panel-meta">
+                    <h2>SEO &amp; Meta</h2>
+                    <div class="field"><label>Page Title</label><input type="text" data-path="meta.title"></div>
+                    <div class="field"><label>Meta Description</label><textarea data-path="meta.description"></textarea><p class="hint">Shows in Google. Keep under 160 chars.</p></div>
+                </div>
+                <div class="section-panel inquiries-panel" id="panel-inquiries">
+                    <h2>Booking Inquiries</h2>
+                    <div id="inquiries-list"><p style="color:var(--muted)">Loading...</p></div>
+                </div>
+                <div class="ai-box" id="aiBox">
+                    <h3>AI Assistant</h3>
+                    <textarea id="aiPrompt" placeholder="Ask the AI to rewrite text, suggest copy, or improve a section..."></textarea>
+                    <button onclick="askAI()">Generate</button>
+                    <div class="ai-result" id="aiResult"></div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- CHANGE PASSWORD MODAL -->
-    <div class="modal-overlay" id="passwordModal">
-        <div class="modal">
-            <h2>Change Password</h2>
-            <p>You must set a new password before continuing.</p>
-            <form id="passwordForm">
-                <div class="form-group">
-                    <label for="newPass">New Password (min 8 chars)</label>
-                    <input type="password" id="newPass" required minlength="8" autocomplete="new-password">
-                </div>
-                <div class="form-group">
-                    <label for="confirmPass">Confirm Password</label>
-                    <input type="password" id="confirmPass" required minlength="8" autocomplete="new-password">
-                </div>
-                <button type="submit" class="btn">Set Password</button>
-                <p class="error-msg" id="passError"></p>
-            </form>
-        </div>
-    </div>
-
+    <div class="toast" id="toast"></div>
     <script>
-    const loginView = document.getElementById('loginView');
-    const dashView = document.getElementById('dashView');
-    const passwordModal = document.getElementById('passwordModal');
+    let content = {};
+    let currentSection = 'hero';
 
-    // Check if already logged in
-    async function checkAuth() {
-        try {
-            const res = await fetch('/api/auth/me');
-            if (res.ok) {
-                const data = await res.json();
-                if (data.must_change_password) {
-                    showDash();
-                    passwordModal.classList.add('active');
-                } else {
-                    showDash();
-                }
-            }
-        } catch {}
-    }
-
-    function showDash() {
-        loginView.style.display = 'none';
-        dashView.style.display = 'block';
-        loadInquiries();
-    }
-
-    // Login
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('loginBtn');
-        const err = document.getElementById('loginError');
-        btn.disabled = true;
-        err.style.display = 'none';
-
-        try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: document.getElementById('loginEmail').value,
-                    password: document.getElementById('loginPassword').value
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Login failed');
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password}) });
+        const data = await res.json();
+        if (data.ok) {
             if (data.must_change_password) {
-                showDash();
-                passwordModal.classList.add('active');
-            } else {
-                showDash();
+                const newPass = prompt('You must change your password. Enter a new one:');
+                if (newPass) await fetch('/api/auth/change-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({new_password:newPass}) });
             }
-        } catch (ex) {
-            err.textContent = ex.message;
-            err.style.display = 'block';
+            showAdmin();
+        } else {
+            document.getElementById('loginError').textContent = data.error || 'Login failed';
         }
-        btn.disabled = false;
-    });
+    }
+    async function logout() { await fetch('/api/auth/logout',{method:'POST'}); location.reload(); }
+    async function checkAuth() { const r = await fetch('/api/auth/me'); if(r.ok) showAdmin(); }
+    function showAdmin() { document.getElementById('loginPanel').style.display='none'; document.getElementById('adminPanel').classList.add('active'); loadContent(); loadInquiries(); }
 
-    // Change password
-    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const err = document.getElementById('passError');
-        const newPass = document.getElementById('newPass').value;
-        const confirm = document.getElementById('confirmPass').value;
-        err.style.display = 'none';
+    async function loadContent() {
+        const res = await fetch('/api/content');
+        content = await res.json();
+        renderFields();
+        renderListEditors();
+    }
 
-        if (newPass !== confirm) {
-            err.textContent = 'Passwords do not match';
-            err.style.display = 'block';
-            return;
-        }
+    function getPath(obj, path) { return path.split('.').reduce((o,k) => o?.[k], obj); }
+    function setPath(obj, path, value) {
+        const keys = path.split('.');
+        let o = obj;
+        for (let i = 0; i < keys.length - 1; i++) { const k=keys[i]; if(o[k]===undefined) o[k]=isNaN(keys[i+1])?{}:[]; o=o[k]; }
+        o[keys[keys.length-1]] = value;
+    }
 
-        try {
-            const res = await fetch('/api/auth/change-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ new_password: newPass })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            passwordModal.classList.remove('active');
-        } catch (ex) {
-            err.textContent = ex.message;
-            err.style.display = 'block';
-        }
-    });
+    function renderFields() {
+        document.querySelectorAll('[data-path]').forEach(el => {
+            const val = getPath(content, el.dataset.path) || '';
+            el.value = val;
+        });
+    }
 
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        location.reload();
-    });
+    function collectFields() {
+        document.querySelectorAll('[data-path]').forEach(el => { setPath(content, el.dataset.path, el.value); });
+    }
 
-    // Load inquiries
+    function renderListEditors() {
+        renderListEditor('setlist-editor', content.music?.setlist||[], items => { content.music.setlist=items; });
+        renderListEditor('services-editor', content.booking?.services||[], items => { content.booking.services=items; });
+        renderListEditor('videos-editor', content.live?.videos||[], items => { content.live.videos=items; });
+        renderBands();
+        renderSocials();
+        renderLiveLinks();
+    }
+
+    function renderListEditor(id, items, onChange) {
+        const c = document.getElementById(id);
+        let h = '<div class="list-editor">';
+        items.forEach((item,i) => { h += '<div class="list-editor__item"><input value="'+esc(item)+'" onchange="updateListItem(\''+id+'\','+i+',this.value)"><button onclick="removeListItem(\''+id+'\','+i+')">×</button></div>'; });
+        h += '<button class="list-editor__add" onclick="addListItem(\''+id+'\')">+ Add</button></div>';
+        c.innerHTML = h; c._items = items; c._onChange = onChange;
+    }
+    function updateListItem(id,i,val) { const c=document.getElementById(id); c._items[i]=val; c._onChange(c._items); }
+    function removeListItem(id,i) { const c=document.getElementById(id); c._items.splice(i,1); c._onChange(c._items); renderListEditors(); }
+    function addListItem(id) { const c=document.getElementById(id); c._items.push(''); c._onChange(c._items); renderListEditors(); }
+
+    function renderBands() {
+        const bands = content.music?.bands||[];
+        let h = '';
+        bands.forEach((b,i) => {
+            h += '<div class="band-editor"><h4>Band '+(i+1)+'</h4>';
+            h += '<div class="field"><label>Name</label><input value="'+esc(b.name)+'" onchange="content.music.bands['+i+'].name=this.value"></div>';
+            h += '<div class="field"><label>Description</label><textarea onchange="content.music.bands['+i+'].description=this.value">'+esc(b.description)+'</textarea></div>';
+            h += '<div class="field"><label>Link URL</label><input value="'+esc(b.link)+'" onchange="content.music.bands['+i+'].link=this.value"></div>';
+            h += '<div class="field"><label>Link Text</label><input value="'+esc(b.link_text)+'" onchange="content.music.bands['+i+'].link_text=this.value"></div></div>';
+        });
+        document.getElementById('bands-editor').innerHTML = h;
+    }
+
+    function renderSocials() {
+        const socials = content.about?.socials||[];
+        let h = '<label style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:0.35rem">Social Links</label>';
+        socials.forEach((s,i) => {
+            h += '<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem"><input style="flex:1;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem" placeholder="Label" value="'+esc(s.label)+'" onchange="content.about.socials['+i+'].label=this.value"><input style="flex:2;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem" placeholder="URL" value="'+esc(s.url)+'" onchange="content.about.socials['+i+'].url=this.value"><button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem" onclick="content.about.socials.splice('+i+',1);renderSocials()">×</button></div>';
+        });
+        h += '<button class="list-editor__add" style="margin-top:0.25rem;border-radius:4px;padding:0.4rem" onclick="content.about.socials.push({label:\'\',url:\'\'});renderSocials()">+ Add Social</button>';
+        document.getElementById('socials-editor').innerHTML = h;
+    }
+
+    function renderLiveLinks() {
+        const links = content.live?.links||[];
+        let h = '<label style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:0.35rem">Platform Links</label>';
+        links.forEach((l,i) => {
+            h += '<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem"><input style="width:50px;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem" placeholder="Icon" value="'+esc(l.icon)+'" onchange="content.live.links['+i+'].icon=this.value"><input style="flex:1;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem" placeholder="Label" value="'+esc(l.label)+'" onchange="content.live.links['+i+'].label=this.value"><input style="flex:2;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem" placeholder="URL" value="'+esc(l.url)+'" onchange="content.live.links['+i+'].url=this.value"><button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem" onclick="content.live.links.splice('+i+',1);renderLiveLinks()">×</button></div>';
+        });
+        h += '<button class="list-editor__add" style="margin-top:0.25rem;border-radius:4px;padding:0.4rem" onclick="content.live.links.push({icon:\'\',label:\'\',url:\'\'});renderLiveLinks()">+ Add Link</button>';
+        document.getElementById('live-links-editor').innerHTML = h;
+    }
+
+    async function saveAll() {
+        collectFields();
+        const res = await fetch('/api/admin/content', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(content) });
+        const data = await res.json();
+        if(data.ok) toast('Saved & published!'); else toast('Save failed'+(data.error?': '+data.error:''), true);
+    }
+
+    async function hardReset() {
+        if(!confirm('This will revert ALL content to the original defaults. Are you sure?')) return;
+        const res = await fetch('/api/admin/content/reset', { method:'POST' });
+        const data = await res.json();
+        if(data.ok) { toast('Reset to defaults'); loadContent(); } else toast('Reset failed', true);
+    }
+
+    async function askAI() {
+        const prompt = document.getElementById('aiPrompt').value;
+        if(!prompt) return;
+        document.getElementById('aiResult').textContent = 'Thinking...';
+        const res = await fetch('/api/admin/ai', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ prompt, section:currentSection, current_content:JSON.stringify(content[currentSection]||{}) }) });
+        const data = await res.json();
+        document.getElementById('aiResult').textContent = data.result || data.error || 'No response';
+    }
+
     async function loadInquiries() {
         try {
             const res = await fetch('/api/admin/inquiries');
-            if (!res.ok) return;
+            if(!res.ok) return;
             const data = await res.json();
-            const list = data.inquiries || [];
-
-            const newCount = list.filter(i => i.status === 'new').length;
-            const readCount = list.filter(i => i.status === 'read').length;
-            document.getElementById('statTotal').textContent = list.length;
-            document.getElementById('statNew').textContent = newCount;
-            document.getElementById('statRead').textContent = readCount;
-
-            const container = document.getElementById('inquiryList');
-            if (!list.length) {
-                container.innerHTML = '<div class="empty">No inquiries yet. They\'ll show up here when someone fills out the contact form.</div>';
-                return;
-            }
-
-            container.innerHTML = list.map(i => `
-                <div class="inquiry-card ${i.status === 'new' ? 'unread' : ''}">
-                    <div class="meta">
-                        <span class="name">${esc(i.name)}</span>
-                        <span class="date">${new Date(i.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    </div>
-                    <span class="type-badge">${esc(i.type)}</span>
-                    ${i.event_date ? `<span class="type-badge">📅 ${esc(i.event_date)}</span>` : ''}
-                    <div class="message">${esc(i.message)}</div>
-                    <div class="contact">✉️ ${esc(i.email)}</div>
-                    ${i.status === 'new' ? `<div class="actions"><button class="mark-read" onclick="markRead(${i.id})">Mark as read</button></div>` : ''}
-                </div>
-            `).join('');
-        } catch {}
+            const list = document.getElementById('inquiries-list');
+            if(!data.inquiries?.length) { list.innerHTML='<p style="color:var(--muted)">No inquiries yet.</p>'; return; }
+            list.innerHTML = data.inquiries.map(q => '<div class="inquiry"><h4>'+esc(q.name)+'</h4><p>'+esc(q.message)+'</p><div class="meta">'+esc(q.type)+' · '+esc(q.email)+' · '+(q.created_at?.split('T')[0]||'')+'</div></div>').join('');
+        } catch(e) {}
     }
 
-    async function markRead(id) {
-        await fetch('/api/admin/inquiries', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, status: 'read' })
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            currentSection = link.dataset.section;
+            document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-'+currentSection)?.classList.add('active');
+            document.getElementById('aiBox').style.display = currentSection==='inquiries'?'none':'block';
         });
-        loadInquiries();
-    }
+    });
 
-    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function toast(msg, err) { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(err?' error':''); setTimeout(()=>t.className='toast',3000); }
 
     checkAuth();
     </script>

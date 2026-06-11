@@ -237,5 +237,105 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+    // Hydrate from CMS content
+    (async function() {
+        try {
+            const res = await fetch('/api/content');
+            if (!res.ok) return;
+            const c = await res.json();
+            if (!c || !c.hero) return;
+
+            // Theme
+            if (c.theme) {
+                const r = document.documentElement.style;
+                if (c.theme.accent) r.setProperty('--accent', c.theme.accent);
+                if (c.theme.bg) r.setProperty('--bg', c.theme.bg);
+                if (c.theme.surface) r.setProperty('--surface', c.theme.surface);
+                if (c.theme.text) r.setProperty('--text', c.theme.text);
+                if (c.theme.muted) r.setProperty('--muted', c.theme.muted);
+            }
+
+            // Meta
+            if (c.meta) {
+                if (c.meta.title) document.title = c.meta.title;
+                const desc = document.querySelector('meta[name="description"]');
+                if (desc && c.meta.description) desc.content = c.meta.description;
+            }
+
+            // Hero
+            const heroTitle = document.querySelector('.hero__title');
+            const heroSub = document.querySelector('.hero__subtitle');
+            const heroCta = document.querySelector('.hero__content .btn');
+            if (heroTitle && c.hero.title) heroTitle.textContent = c.hero.title;
+            if (heroSub && c.hero.subtitle) heroSub.textContent = c.hero.subtitle;
+            if (heroCta) { if (c.hero.cta_text) heroCta.textContent = c.hero.cta_text; if (c.hero.cta_link) heroCta.href = c.hero.cta_link; }
+
+            // About
+            const aboutH = document.querySelector('.about h2');
+            if (aboutH && c.about?.heading) aboutH.textContent = c.about.heading;
+            const aboutPs = document.querySelectorAll('.about__text p');
+            if (c.about?.paragraphs) c.about.paragraphs.forEach((p, i) => { if (aboutPs[i]) aboutPs[i].innerHTML = p; });
+            const aboutImg = document.querySelector('.about__photo');
+            if (aboutImg && c.about?.image) aboutImg.src = c.about.image;
+            if (c.about?.socials) {
+                const socialsDiv = document.querySelector('.about__socials');
+                if (socialsDiv) socialsDiv.innerHTML = c.about.socials.map(s => '<a href="'+s.url+'" target="_blank" rel="noopener">'+s.label+'</a>').join('');
+            }
+
+            // Music
+            const musicH = document.querySelector('.music h2');
+            if (musicH && c.music?.heading) musicH.textContent = c.music.heading;
+            if (c.music?.bands) {
+                const bandsDiv = document.querySelector('.music__bands');
+                if (bandsDiv) bandsDiv.innerHTML = c.music.bands.map(b => '<div class="band"><span class="band__label">Band</span><h3>'+b.name+'</h3><p>'+b.description+'</p>'+(b.link?'<a href="'+b.link+'" target="_blank" rel="noopener" class="link--arrow">'+b.link_text+'</a>':'')+'</div>').join('');
+            }
+            const setlistH = document.querySelector('.setlist__heading');
+            if (setlistH && c.music?.setlist_heading) setlistH.textContent = c.music.setlist_heading;
+            if (c.music?.setlist) {
+                const setlistDiv = document.querySelector('.setlist__items');
+                if (setlistDiv) setlistDiv.innerHTML = c.music.setlist.map(s => '<span>'+s+'</span>').join('');
+            }
+
+            // Live
+            const liveH = document.querySelector('.live h2');
+            if (liveH && c.live?.heading) liveH.textContent = c.live.heading;
+            const liveText = document.querySelector('.live__text');
+            if (liveText && c.live?.text) liveText.textContent = c.live.text;
+            if (c.live?.links) {
+                const linksDiv = document.querySelector('.live__links');
+                if (linksDiv) linksDiv.innerHTML = c.live.links.map(l => '<a href="'+l.url+'" target="_blank" rel="noopener" class="live__link"><span class="live__icon">'+l.icon+'</span><span>'+l.label+'</span></a>').join('');
+            }
+            // Videos (if any IDs added)
+            if (c.live?.videos?.length) {
+                const liveSection = document.querySelector('.live .container');
+                if (liveSection) {
+                    let vhtml = '<div class="videos__grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:2rem">';
+                    c.live.videos.forEach(vid => { vhtml += '<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:6px;overflow:hidden"><iframe src="https://www.youtube.com/embed/'+vid+'" style="position:absolute;top:0;left:0;width:100%;height:100%" frameborder="0" allowfullscreen loading="lazy"></iframe></div>'; });
+                    vhtml += '</div>';
+                    liveSection.insertAdjacentHTML('beforeend', vhtml);
+                }
+            }
+
+            // Booking
+            const bookH = document.querySelector('.booking h2');
+            if (bookH && c.booking?.heading) bookH.textContent = c.booking.heading;
+            const bookSub = document.querySelector('.booking__sub');
+            if (bookSub && c.booking?.subtitle) bookSub.textContent = c.booking.subtitle;
+            if (c.booking?.services) {
+                const bookList = document.querySelector('.booking__list');
+                if (bookList) bookList.innerHTML = c.booking.services.map(s => '<li>'+s+'</li>').join('');
+            }
+            const bookCta = document.querySelector('.booking .btn');
+            if (bookCta && c.booking?.cta_text) bookCta.textContent = c.booking.cta_text;
+
+            // Contact
+            const contactH = document.querySelector('.contact h2');
+            if (contactH && c.contact?.heading) contactH.textContent = c.contact.heading;
+            const contactSub = document.querySelector('.contact__sub');
+            if (contactSub && c.contact?.subtitle) contactSub.textContent = c.contact.subtitle;
+        } catch(e) { /* fail silently — static content remains */ }
+    })();
+    </script>
 </body>
 </html>
