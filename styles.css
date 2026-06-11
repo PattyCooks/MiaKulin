@@ -228,6 +228,15 @@ body {
     align-items: center;
 }
 
+.about__photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+}
+
 .about__placeholder {
     aspect-ratio: 3/4;
     background: var(--color-surface);
