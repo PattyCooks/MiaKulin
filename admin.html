@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Mia Kulin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d1a;
+            --surface: #1a1a2e;
+            --border: rgba(255,255,255,0.08);
+            --text: #f0f0f5;
+            --muted: #a0a0b5;
+            --accent: #c084fc;
+            --accent-hover: #a855f7;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* Login Form */
+        .login-wrapper { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+        .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 400px; }
+        .login-card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .login-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
+        .form-group input { width: 100%; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; }
+        .form-group input:focus { outline: none; border-color: var(--accent); }
+        .btn { width: 100%; padding: 0.85rem; background: var(--accent); color: #fff; border: none; border-radius: 50px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: var(--accent-hover); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 1rem; display: none; }
+
+        /* Dashboard */
+        .dashboard { display: none; padding: 2rem; max-width: 1000px; margin: 0 auto; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+        .dash-header h1 { font-size: 1.5rem; }
+        .dash-header .logout-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 1rem; border-radius: 50px; cursor: pointer; font-size: 0.85rem; }
+        .dash-header .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
+        .stat-card .number { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .stat-card .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+
+        .section-title { font-size: 1.1rem; margin-bottom: 1rem; color: var(--muted); }
+        .inquiry-list { display: flex; flex-direction: column; gap: 1rem; }
+        .inquiry-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: 0.2s; }
+        .inquiry-card.unread { border-left: 3px solid var(--accent); }
+        .inquiry-card .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .inquiry-card .meta .name { font-weight: 600; }
+        .inquiry-card .meta .date { font-size: 0.8rem; color: var(--muted); }
+        .inquiry-card .type-badge { display: inline-block; background: rgba(192,132,252,0.15); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .inquiry-card .message { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+        .inquiry-card .contact { font-size: 0.85rem; color: var(--accent); margin-top: 0.5rem; }
+        .inquiry-card .actions { margin-top: 0.75rem; }
+        .inquiry-card .mark-read { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; }
+        .inquiry-card .mark-read:hover { border-color: var(--success); color: var(--success); }
+
+        .empty { text-align: center; color: var(--muted); padding: 3rem; }
+
+        /* Change Password Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 400px; }
+        .modal h2 { margin-bottom: 0.5rem; }
+        .modal p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <!-- LOGIN -->
+    <div class="login-wrapper" id="loginView">
+        <div class="login-card">
+            <h1>Admin Login</h1>
+            <p>Restricted to authorized email only.</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Sign In</button>
+                <p class="error-msg" id="loginError"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="dashView">
+        <div class="dash-header">
+            <h1>📬 Inquiries</h1>
+            <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card"><div class="number" id="statTotal">0</div><div class="label">Total</div></div>
+            <div class="stat-card"><div class="number" id="statNew">0</div><div class="label">New</div></div>
+            <div class="stat-card"><div class="number" id="statRead">0</div><div class="label">Read</div></div>
+        </div>
+
+        <h3 class="section-title">Recent Inquiries</h3>
+        <div class="inquiry-list" id="inquiryList">
+            <div class="empty">No inquiries yet.</div>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal">
+            <h2>Change Password</h2>
+            <p>You must set a new password before continuing.</p>
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="newPass">New Password (min 8 chars)</label>
+                    <input type="password" id="newPass" required minlength="8" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPass">Confirm Password</label>
+                    <input type="password" id="confirmPass" required minlength="8" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn">Set Password</button>
+                <p class="error-msg" id="passError"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    const loginView = document.getElementById('loginView');
+    const dashView = document.getElementById('dashView');
+    const passwordModal = document.getElementById('passwordModal');
+
+    // Check if already logged in
+    async function checkAuth() {
+        try {
+            const res = await fetch('/api/auth/me');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.must_change_password) {
+                    showDash();
+                    passwordModal.classList.add('active');
+                } else {
+                    showDash();
+                }
+            }
+        } catch {}
+    }
+
+    function showDash() {
+        loginView.style.display = 'none';
+        dashView.style.display = 'block';
+        loadInquiries();
+    }
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('loginBtn');
+        const err = document.getElementById('loginError');
+        btn.disabled = true;
+        err.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('loginEmail').value,
+                    password: document.getElementById('loginPassword').value
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Login failed');
+            if (data.must_change_password) {
+                showDash();
+                passwordModal.classList.add('active');
+            } else {
+                showDash();
+            }
+        } catch (ex) {
+            err.textContent = ex.message;
+            err.style.display = 'block';
+        }
+        btn.disabled = false;
+    });
+
+    // Change password
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const err = document.getElementById('passError');
+        const newPass = document.getElementById('newPass').value;
+        const confirm = document.getElementById('confirmPass').value;
+        err.style.display = 'none';
+
+        if (newPass !== confirm) {
+            err.textContent = 'Passwords do not match';
+            err.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/auth/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ new_password: newPass })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            passwordModal.classList.remove('active');
+        } catch (ex) {
+            err.textContent = ex.message;
+            err.style.display = 'block';
+        }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.reload();
+    });
+
+    // Load inquiries
+    async function loadInquiries() {
+        try {
+            const res = await fetch('/api/admin/inquiries');
+            if (!res.ok) return;
+            const data = await res.json();
+            const list = data.inquiries || [];
+
+            const newCount = list.filter(i => i.status === 'new').length;
+            const readCount = list.filter(i => i.status === 'read').length;
+            document.getElementById('statTotal').textContent = list.length;
+            document.getElementById('statNew').textContent = newCount;
+            document.getElementById('statRead').textContent = readCount;
+
+            const container = document.getElementById('inquiryList');
+            if (!list.length) {
+                container.innerHTML = '<div class="empty">No inquiries yet. They\'ll show up here when someone fills out the contact form.</div>';
+                return;
+            }
+
+            container.innerHTML = list.map(i => `
+                <div class="inquiry-card ${i.status === 'new' ? 'unread' : ''}">
+                    <div class="meta">
+                        <span class="name">${esc(i.name)}</span>
+                        <span class="date">${new Date(i.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    </div>
+                    <span class="type-badge">${esc(i.type)}</span>
+                    ${i.event_date ? `<span class="type-badge">📅 ${esc(i.event_date)}</span>` : ''}
+                    <div class="message">${esc(i.message)}</div>
+                    <div class="contact">✉️ ${esc(i.email)}</div>
+                    ${i.status === 'new' ? `<div class="actions"><button class="mark-read" onclick="markRead(${i.id})">Mark as read</button></div>` : ''}
+                </div>
+            `).join('');
+        } catch {}
+    }
+
+    async function markRead(id) {
+        await fetch('/api/admin/inquiries', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, status: 'read' })
+        });
+        loadInquiries();
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    checkAuth();
+    </script>
+</body>
+</html>

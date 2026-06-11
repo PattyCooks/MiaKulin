@@ -68,6 +68,7 @@
                 <li><a href="#videos">Videos</a></li>
                 <li><a href="#booking">Book Me</a></li>
                 <li><a href="#contact">Contact</a></li>
+                <li><a href="/qr.html">QR</a></li>
             </ul>
             <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">
                 <span></span>
@@ -223,11 +224,7 @@
             <h2 class="section__title">Contact</h2>
             <p class="section__subtitle">For bookings, collaborations, or just to say hi.</p>
 
-            <form class="contact__form" action="https://formsubmit.co/mia.kulinchenko@gmail.com" method="POST">
-                <!-- FormSubmit config -->
-                <input type="hidden" name="_subject" value="New Booking Inquiry — MiaKulin.com">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_next" value="https://miakulin.com/#contact">
+            <form class="contact__form" action="/api/inquiries" method="POST">
                 <!-- Honeypot -->
                 <input type="text" name="_honey" style="display:none">
 

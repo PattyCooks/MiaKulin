@@ -1,0 +1,16 @@
+name = "miakulin"
+compatibility_date = "2026-06-10"
+pages_build_output_dir = "./"
+
+[vars]
+ADMIN_EMAIL = "mia.kulinchenko@gmail.com"
+SITE_NAME = "Mia Kulin"
+
+# Required secrets (set via `npx wrangler pages secret put <NAME> --project-name miakulin`):
+#   JWT_SECRET — random 32+ char string for signing JWTs
+
+[[d1_databases]]
+binding = "DB"
+database_name = "miakulin-db"
+database_id = "7a81af51-0989-4af7-9ce1-cdab5329db6b"
+migrations_dir = "migrations"

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mia Kulin — Add to Contacts</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d1a;
+            --surface: #1a1a2e;
+            --border: rgba(255,255,255,0.08);
+            --text: #f0f0f5;
+            --muted: #a0a0b5;
+            --accent: #c084fc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+        }
+        .card__name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .card__role {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        .qr-container {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        #qrcode {
+            width: 220px;
+            height: 220px;
+        }
+        #qrcode img, #qrcode canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .card__hint {
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .card__actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .btn {
+            display: block;
+            padding: 0.85rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: 0.3s ease;
+        }
+        .btn--primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn--primary:hover {
+            background: #a855f7;
+            transform: translateY(-2px);
+        }
+        .btn--outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn--outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .card__links {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .card__links a {
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .card__links a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="card__name">Mia Kulin</h1>
+        <p class="card__role">Singer · Vocalist · Performer</p>
+
+        <div class="qr-container">
+            <div id="qrcode"></div>
+        </div>
+
+        <p class="card__hint">Scan to add me to your contacts</p>
+
+        <div class="card__actions">
+            <a href="/mia.vcf" class="btn btn--primary" download="Mia_Kulin.vcf">Download Contact Card</a>
+            <a href="/" class="btn btn--outline">Visit Website</a>
+        </div>
+
+        <div class="card__links">
+            <a href="https://www.instagram.com/mia.k.music/" target="_blank">@mia.k.music</a>
+            <a href="https://www.youtube.com/@MiaKulinchenko" target="_blank">YouTube</a>
+            <a href="mailto:mia.kulinchenko@gmail.com">Email</a>
+        </div>
+    </div>
+
+    <!-- QR Code Generator (MIT License, ~4KB) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script>
+        // vCard data embedded in QR code
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            'N:Kulinchenko;Mia;;;',
+            'FN:Mia Kulin',
+            'ORG:Whitenoise',
+            'TITLE:Singer & Vocalist',
+            'EMAIL;TYPE=INTERNET:mia.kulinchenko@gmail.com',
+            'URL:https://miakulin.com',
+            'NOTE:Vocalist & bassist | Whitenoise | After Dark Band | Book me at miakulin.com',
+            'END:VCARD'
+        ].join('\n');
+
+        const qr = qrcode(0, 'M');
+        qr.addData(vcard);
+        qr.make();
+        document.getElementById('qrcode').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0 });
+    </script>
+</body>
+</html>
