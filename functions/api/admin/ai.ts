@@ -44,6 +44,45 @@ RULES:
 const ALLOWED_KEYS = new Set([
   'hero', 'about', 'music', 'live', 'booking', 'contact', 'theme', 'meta',
 ]);
+const ALLOWED_THEME_KEYS = new Set(['accent', 'bg', 'surface', 'text', 'muted']);
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function isUrlFieldKey(key: string): boolean {
+  const k = key.toLowerCase();
+  return k === 'url' || k === 'link' || k.endsWith('_link');
+}
+
+function hasDangerousProtocol(value: string): boolean {
+  return /^\s*(?:javascript|data)\s*:/i.test(value);
+}
+
+function sanitizeString(value: string): string {
+  return value
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\son\w+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '')
+    .replace(/\s(href|src)\s*=\s*(['"])\s*(?:javascript|data)\s*:[\s\S]*?\2/gi, '');
+}
+
+function sanitizeNested(value: any, keyHint?: string): any {
+  if (typeof value === 'string') {
+    const cleaned = sanitizeString(value);
+    if (keyHint && isUrlFieldKey(keyHint) && hasDangerousProtocol(cleaned)) return undefined;
+    return cleaned;
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => sanitizeNested(item, keyHint))
+      .filter((item) => item !== undefined);
+  }
+  if (!value || typeof value !== 'object') return value;
+  const out: Record<string, any> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    if (UNSAFE_KEYS.has(key)) continue;
+    const cleaned = sanitizeNested(nested, key);
+    if (cleaned !== undefined) out[key] = cleaned;
+  }
+  return out;
+}
 
 function extractJson(raw: string): any | null {
   if (!raw) return null;
@@ -67,12 +106,13 @@ function sanitizeChanges(changes: any): Record<string, any> {
   if (!changes || typeof changes !== 'object' || Array.isArray(changes)) return {};
   const out: Record<string, any> = {};
   for (const k of Object.keys(changes)) {
-    if (ALLOWED_KEYS.has(k)) out[k] = changes[k];
+    if (ALLOWED_KEYS.has(k)) out[k] = sanitizeNested(changes[k], k);
   }
   // Normalize theme hex colors
-  if (out.theme && typeof out.theme === 'object') {
+  if (out.theme && typeof out.theme === 'object' && !Array.isArray(out.theme)) {
     const t: Record<string, any> = {};
     for (const [key, val] of Object.entries(out.theme)) {
+      if (!ALLOWED_THEME_KEYS.has(key)) continue;
       if (typeof val === 'string' && /^#[0-9a-fA-F]{6}$/.test(val.trim())) {
         t[key] = val.trim().toLowerCase();
       } else if (typeof val === 'string' && /^#[0-9a-fA-F]{3}$/.test(val.trim())) {
@@ -81,7 +121,10 @@ function sanitizeChanges(changes: any): Record<string, any> {
         t[key] = ('#' + s.split('').map(c => c + c).join('')).toLowerCase();
       }
     }
-    out.theme = t;
+    if (Object.keys(t).length) out.theme = t;
+    else delete out.theme;
+  } else if ('theme' in out) {
+    delete out.theme;
   }
   return out;
 }

@@ -292,6 +292,7 @@
     }
 
     let aiUndoSnapshot = null;
+    const unsafeMergeKeys = new Set(['__proto__', 'constructor', 'prototype']);
 
     function deepMerge(target, patch) {
         if (patch === null || patch === undefined) return target;
@@ -302,6 +303,7 @@
         }
         const out = Array.isArray(target) ? target.slice() : Object.assign({}, target);
         for (const k of Object.keys(patch)) {
+            if (unsafeMergeKeys.has(k)) continue;
             out[k] = deepMerge(out[k], patch[k]);
         }
         return out;
